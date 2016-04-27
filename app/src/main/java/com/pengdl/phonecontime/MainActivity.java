@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void date_init() {
-        date.setText(DateFormat.format("20yy-MM-dd", Calendar.getInstance()));
+        date.setText(ShareConst.GetNowYMD());
     }
 
     public void onDestroy() {
@@ -106,9 +106,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
 
         switch (v.getId()) {
-            case R.id.Get:
-                dis.setText(binder.onThePhoneTimeAt(date.getText().toString()));
+            case R.id.Get: {
+                String dt = date.getText().toString();
+                Boolean flag = ShareConst.GetNowYMD().toString().equals(dt);
+                dis.setText(binder.onThePhoneTimeAt(dt, flag));
                 break;
+            }
             case R.id.Show:
                 binder.showEvents();
                 break;
@@ -136,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "onActivityResult, requestCode: " + requestCode + ", resultCode: " + resultCode);
+        Log.d(TAG, "onActivityResult, requestCode: " + requestCode);
 
         if(requestCode == 1000 && resultCode == 1001)
         {

@@ -143,7 +143,8 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 + ID_FIELD + ", "
                 + TIME_YMD_FILED + ", "
                 + TIME_HMS_FILED + ", "
-                + DUR_FIELD
+                + DUR_FIELD + ", "
+                + TIME_IN_SECONDS_FILED
                 + " FROM " + TABLE_NAME + " WHERE "
                 + TIME_YMD_FILED + " = \"" + event.getTime_ymd()
                 + "\" AND "
@@ -172,6 +173,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
             result.setTime_ymd(cursor.getString(1));
             result.setTime_hms(cursor.getString(2));
             result.setDuration(cursor.getInt(3));
+            result.setSeconds(cursor.getInt(4));
 
         } else {
             Log.e(TAG, cursor.getCount() + " event matches.");

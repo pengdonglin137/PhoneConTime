@@ -48,8 +48,8 @@ public class MainService extends Service {
 
             Log.d(TAG, "onReceive enter.");
 
-            time = DateFormat.format("20yy-MM-dd HH-mm-ss", Calendar.getInstance());
-            seconds = System.currentTimeMillis() / 1000;
+            time = ShareConst.GetNowYMD_HMS();
+            seconds = ShareConst.currentTimeSeconds();
             Boolean kb_locked = mkeyguardManager.inKeyguardRestrictedInputMode();
             if (Intent.ACTION_SCREEN_OFF.equals(srcAction)) {
                 Log.d(TAG, "ACTION_SCREEN_OFF received, kb_locked: " + kb_locked);
@@ -120,9 +120,9 @@ public class MainService extends Service {
             return getAllDuration();
         }
 
-        public CharSequence onThePhoneTimeAt(String date) {
+        public CharSequence onThePhoneTimeAt(String date, boolean flag) {
 
-            return getAllDurationAt(date);
+            return getAllDurationAt(date, flag);
         }
 
         public void showEvents(){
@@ -155,7 +155,7 @@ public class MainService extends Service {
         setPrevUserPre(null);
 
         setAllTimeDuration(0);
-        setServerStartTime(System.currentTimeMillis() / 1000);
+        setServerStartTime(ShareConst.currentTimeSeconds());
     }
 
     private void dumpEvent(screenEvent event) {
@@ -178,7 +178,7 @@ public class MainService extends Service {
         super.onCreate();
 
         /* Get the server start time */
-        setServerStartTime(System.currentTimeMillis() / 1000);
+        setServerStartTime(ShareConst.currentTimeSeconds());
 
         dataBaseInit();
 
@@ -192,8 +192,8 @@ public class MainService extends Service {
 
         screenEvent event = new screenEvent();
 
-        event.setTime_ymd(DateFormat.format("20yy-MM-dd", Calendar.getInstance()).toString());
-        event.setTime_hms("99-99-99");
+        event.setTime_ymd(ShareConst.GetNowYMD().toString());
+        event.setTime_hms(ShareConst.MASK);
 
         event = dbMgr.queryEvent(event);
 
@@ -232,9 +232,9 @@ public class MainService extends Service {
 
         Boolean isactive = mpowermanager.isScreenOn();
         if (isactive) {
-            addToDb(DateFormat.format("20yy-MM-dd HH-mm-ss", Calendar.getInstance()),
+            addToDb(ShareConst.GetNowYMD_HMS(),
                     SCREEN_OFF, mkeyguardManager.inKeyguardRestrictedInputMode(),
-                    System.currentTimeMillis() / 1000);
+                    ShareConst.currentTimeSeconds());
         }
 
 
@@ -342,7 +342,7 @@ public class MainService extends Service {
         String mm = min>9 ? min + "" : "0" + min;
         String ss = sec>9 ? sec + "" : "0" + sec;
 
-        return hh+":"+mm+":"+ss;
+        return hh + ":" + mm + ":" + ss;
     }
 
     private void updateLatestEvent(screenEvent event) {
@@ -351,8 +351,9 @@ public class MainService extends Service {
 
         latest.setType(event.getType());
         latest.setTime_ymd(event.getTime_ymd());
-        latest.setTime_hms("99-99-99");
+        latest.setTime_hms(ShareConst.MASK);
         latest.setDuration(event.getDuration());
+        latest.setSeconds(event.getSeconds());
         latest.setValid(event.getValid());
         latest.setKb_locked(event.getKb_locked());
         latest.setId_next(0);
@@ -361,6 +362,7 @@ public class MainService extends Service {
         if (cache_latest != null) {
             if (cache_latest.getTime_ymd().equals(event.getTime_ymd())) {
                 cache_latest.setDuration(event.getDuration());
+                cache_latest.setSeconds(event.getSeconds());
                 dbMgr.updateEvent(cache_latest);
             } else {
                 cache_latest = dbMgr.addItem(latest);
@@ -375,19 +377,28 @@ public class MainService extends Service {
         dumpEvent(cache_latest);
     }
 
-    public CharSequence getAllDurationAt(String date) {
+    public CharSequence getAllDurationAt(String date, boolean flag) {
         screenEvent event = new screenEvent();
 
         event.setTime_ymd(date);
-        event.setTime_hms("99-99-99");
+        event.setTime_hms(ShareConst.MASK);
 
         if ((event = dbMgr.queryEvent(event)) == null) {
-            Log.d(TAG, "Not found, date: " + date);
-            return "00:00:00";
+            Log.d(TAG, "Not found, date: " + date + ", flag: " + flag);
+            if (flag) {
+                return FormatMiss(ShareConst.currentTimeSeconds() - getServerStartTime());
+            } else {
+                return "00:00:00";
+            }
         } else {
-            Log.d(TAG, "found, date: " + event.getDuration());
-            return FormatMiss(event.getDuration());
-        }
+            long duration = 0;
+            Log.d(TAG, "found, date: " + event.getDuration() + ", flag: " + flag);
+            if (flag) {
+                duration = ShareConst.currentTimeSeconds() - event.getSeconds();
+                Log.d(TAG, "duration: " + duration + ", currentSeconds: " + ShareConst.currentTimeSeconds() + ", lastSeconds: " + event.getSeconds());
+            }
 
+            return FormatMiss(event.getDuration() + duration);
+        }
     }
 }
