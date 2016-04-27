@@ -280,6 +280,28 @@ public class MainService extends Service {
         }
     }
 
+    private screenEvent find_event(screenEvent event) {
+
+        screenEvent compareEvent = null;
+
+        if (getPrevUserPre() != null && getPreScnOn() != null) {
+            if (getPreScnOn().getKb_locked()) {
+                compareEvent = getPrevUserPre();
+            } else {
+                compareEvent = getPreScnOn();
+            }
+        } else if (getPreScnOn() != null) {
+            compareEvent = getPreScnOn();
+            if (event != null && event.getKb_locked()) {
+                compareEvent.setValid(false);
+            }
+        } else if (getPrevUserPre() != null) {
+            compareEvent = getPrevUserPre();
+        }
+
+        return compareEvent;
+    }
+
     private long computeDuration(screenEvent event) {
         long duration = 0;
         long prev_duration = 0;
@@ -293,22 +315,9 @@ public class MainService extends Service {
             prev_duration = getPreScnOff().getDuration();
         }
 
-        screenEvent compareEvent = null;
+        screenEvent compareEvent = find_event(event);
 
-        if (getPrevUserPre() != null && getPreScnOn() != null) {
-            if (getPreScnOn().getKb_locked()) {
-                compareEvent = getPrevUserPre();
-            } else {
-                compareEvent = getPreScnOn();
-            }
-        } else if (getPreScnOn() != null) {
-            compareEvent = getPreScnOn();
-            if (event.getKb_locked()) {
-                compareEvent.setValid(false);
-            }
-        } else if (getPrevUserPre() != null) {
-            compareEvent = getPrevUserPre();
-        }
+
 
         if (compareEvent != null) {
             if (compareEvent.getValid()) {
@@ -394,7 +403,13 @@ public class MainService extends Service {
             long duration = 0;
             Log.d(TAG, "found, date: " + event.getDuration() + ", flag: " + flag);
             if (flag) {
-                duration = ShareConst.currentTimeSeconds() - event.getSeconds();
+                screenEvent compareEvent = find_event(null);
+                if (compareEvent != null) {
+                    duration = ShareConst.currentTimeSeconds() - compareEvent.getSeconds();
+                } else {
+                    duration = ShareConst.currentTimeSeconds() - getServerStartTime();
+                }
+
                 Log.d(TAG, "duration: " + duration + ", currentSeconds: " + ShareConst.currentTimeSeconds() + ", lastSeconds: " + event.getSeconds());
             }
 

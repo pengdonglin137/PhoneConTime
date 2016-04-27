@@ -185,7 +185,8 @@ public class DatabaseManager extends SQLiteOpenHelper {
     public void updateEvent(screenEvent event) {
         Log.d(TAG, "updateEvent.");
         String selectQuery = "UPDATE " + TABLE_NAME + " SET "
-                + DUR_FIELD + " = " + event.getDuration() + " "
+                + DUR_FIELD + " = " + event.getDuration() + ", "
+                + TIME_IN_SECONDS_FILED + " = " + event.getSeconds() + " "
                 + "WHERE "
                 + ID_FIELD + " = " + event.getId();
 
