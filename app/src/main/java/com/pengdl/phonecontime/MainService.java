@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.text.format.DateFormat;
 import android.util.Log;
 
@@ -30,10 +31,15 @@ public class MainService extends Service {
     private screenEvent preScnOff = null;
     private screenEvent preScnOn = null;
     private screenEvent cache_latest = null;
+    private KeyguardManager mkeyguardManager;
+    private PowerManager mpowermanager;
+    private final static int DELETE_DB = 0;
+    private final static int ANOTHERDAY = 1;
+    private final static int TIMECHANGE = 2;
 
     class ScreenBroadcastReceiver extends BroadcastReceiver {
 
-        private KeyguardManager mkeyguardManager = (KeyguardManager)getSystemService(Context.KEYGUARD_SERVICE);
+
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -46,18 +52,21 @@ public class MainService extends Service {
             seconds = System.currentTimeMillis() / 1000;
             Boolean kb_locked = mkeyguardManager.inKeyguardRestrictedInputMode();
             if (Intent.ACTION_SCREEN_OFF.equals(srcAction)) {
-                Log.d(TAG, "Intent.ACTION_SCREEN_OFF received, kb_locked: " + kb_locked);
+                Log.d(TAG, "ACTION_SCREEN_OFF received, kb_locked: " + kb_locked);
                 addToDb(time, SCREEN_OFF, kb_locked, seconds);
             } else if (Intent.ACTION_SCREEN_ON.equals(srcAction)) {
-                Log.d(TAG, "Intent.ACTION_SCREEN_ON received, kb_locked: " + kb_locked);
+                Log.d(TAG, "ACTION_SCREEN_ON received, kb_locked: " + kb_locked);
                 addToDb(time, SCREEN_ON, kb_locked, seconds);
             } else if (Intent.ACTION_USER_PRESENT.equals(srcAction)) {
-                Log.d(TAG, "Intent.ACTION_USER_PRESENT received, kb_locked: " + kb_locked);
+                Log.d(TAG, "ACTION_USER_PRESENT received, kb_locked: " + kb_locked);
                 addToDb(time, USER_PRESENT, kb_locked, seconds);
-            } else {
+            } else if (Intent.ACTION_TIME_TICK.equals(srcAction)){
+                Log.d(TAG, "ACTION_TIME_TICK received, time: " + time);
 
+            } else if (Intent.ACTION_TIME_CHANGED.equals(srcAction)) {
+                Log.d(TAG, "ACTION_TIME_CHANGED received.");
+                resetData(TIMECHANGE);
             }
-
         }
     }
 
@@ -128,9 +137,25 @@ public class MainService extends Service {
         }
 
         public void deleteEvents() {
-            cache_latest = null;
+            resetData(DELETE_DB);
             dbMgr.deleteEvents();
         }
+    }
+
+    public void resetData(int reason) {
+        Log.d(TAG, "Reseting data, reason: " + reason);
+
+        if (reason == ANOTHERDAY) {
+
+        }
+
+        cache_latest = null;
+        setPreScnOn(null);
+        setPreScnOff(null);
+        setPrevUserPre(null);
+
+        setAllTimeDuration(0);
+        setServerStartTime(System.currentTimeMillis() / 1000);
     }
 
     private void dumpEvent(screenEvent event) {
@@ -151,6 +176,9 @@ public class MainService extends Service {
 
     public void onCreate() {
         super.onCreate();
+
+        /* Get the server start time */
+        setServerStartTime(System.currentTimeMillis() / 1000);
 
         dataBaseInit();
 
@@ -177,14 +205,17 @@ public class MainService extends Service {
     }
 
     private void otherInit() {
-        /* Get the server start time */
-        setServerStartTime(System.currentTimeMillis()/1000);
+
+        mkeyguardManager = (KeyguardManager)getSystemService(Context.KEYGUARD_SERVICE);
+        mpowermanager = (PowerManager)getSystemService(POWER_SERVICE);
 
         /* receiver init */
         IntentFilter intentfilter = new IntentFilter();
         intentfilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentfilter.addAction(Intent.ACTION_SCREEN_ON);
         intentfilter.addAction(Intent.ACTION_USER_PRESENT);
+        intentfilter.addAction(Intent.ACTION_TIME_TICK);
+        intentfilter.addAction(Intent.ACTION_TIME_CHANGED);
         screenBroadcastReceiver = new ScreenBroadcastReceiver();
         this.registerReceiver(screenBroadcastReceiver, intentfilter);
     }
@@ -198,6 +229,15 @@ public class MainService extends Service {
     public void onDestroy() {
         super.onDestroy();
         this.unregisterReceiver(screenBroadcastReceiver);
+
+        Boolean isactive = mpowermanager.isScreenOn();
+        if (isactive) {
+            addToDb(DateFormat.format("20yy-MM-dd HH-mm-ss", Calendar.getInstance()),
+                    SCREEN_OFF, mkeyguardManager.inKeyguardRestrictedInputMode(),
+                    System.currentTimeMillis() / 1000);
+        }
+
+
         Log.d(TAG, "Destroyed.");
     }
 
@@ -306,6 +346,7 @@ public class MainService extends Service {
     }
 
     private void updateLatestEvent(screenEvent event) {
+        Log.d(TAG, "UpdateLatestEvent.");
         screenEvent latest = new screenEvent();
 
         latest.setType(event.getType());

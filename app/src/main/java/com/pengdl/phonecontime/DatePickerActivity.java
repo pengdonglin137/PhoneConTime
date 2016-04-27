@@ -14,7 +14,7 @@ import java.util.Calendar;
 public class DatePickerActivity extends AppCompatActivity implements View.OnClickListener {
 
     private final static String TAG = "OTP_DP";
-    private Button back, today;
+    private Button Okay, today;
     private DatePicker datepicker;
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
@@ -34,8 +34,8 @@ public class DatePickerActivity extends AppCompatActivity implements View.OnClic
         editor = preferences.edit();
         datepicker_valid = preferences.getString(ShareConst.DATEPICKER_VALID, null);
 
-        back = (Button)findViewById(R.id.Back);
-        back.setOnClickListener(this);
+        Okay = (Button)findViewById(R.id.OK);
+        Okay.setOnClickListener(this);
         today = (Button)findViewById(R.id.Today);
         today.setOnClickListener(this);
 
@@ -72,7 +72,8 @@ public class DatePickerActivity extends AppCompatActivity implements View.OnClic
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.Back:
+            case R.id.OK: {
+
                 String date = year + "-"
                         + ((month+1)>9 ? (month+1)+"" : "0"+(month+1)) + "-"
                         + (day>9 ? day + "" : "0" + day);
@@ -80,8 +81,19 @@ public class DatePickerActivity extends AppCompatActivity implements View.OnClic
                 intent.putExtra("date", date);
                 Log.d(TAG, "datePicker: " + date);
                 setResult(1001, intent);
+
+                if (!have_store) {
+                    have_store = true;
+
+                    editor.putInt(ShareConst.DATEPICKER_YEAR, year);
+                    editor.putInt(ShareConst.DATEPICKER_MONTH, month);
+                    editor.putInt(ShareConst.DATEPICKER_DAY, day);
+                    editor.commit();
+                }
+
                 finish();
                 break;
+            }
             case R.id.Today:
                 Calendar c = Calendar.getInstance();
                 year = c.get(Calendar.YEAR);
@@ -91,19 +103,6 @@ public class DatePickerActivity extends AppCompatActivity implements View.OnClic
                 break;
             default:
                 break;
-        }
-    }
-
-    public void onPause () {
-        super.onPause();
-
-        if (!have_store) {
-            have_store = true;
-
-            editor.putInt(ShareConst.DATEPICKER_YEAR, year);
-            editor.putInt(ShareConst.DATEPICKER_MONTH, month);
-            editor.putInt(ShareConst.DATEPICKER_DAY, day);
-            editor.commit();
         }
     }
 }

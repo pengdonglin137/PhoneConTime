@@ -17,10 +17,10 @@
         android:layout_centerHorizontal="true"/>
 
     <Button
-        android:id="@+id/Back"
+        android:id="@+id/OK"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text = "Back"
+        android:text = "OK"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"/>
 
@@ -30,6 +30,6 @@
         android:layout_height="wrap_content"
         android:text = "Today"
         android:layout_centerHorizontal="true"
-        android:layout_above="@id/Back"/>
+        android:layout_above="@id/OK"/>
 
 </RelativeLayout>
