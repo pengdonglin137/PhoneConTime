@@ -72,7 +72,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (id == R.id.delete_database) {
 
-            binder.deleteEvents();
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.prompt);
+            builder.setMessage(R.string.delete_or_not);
+
+            builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            binder.deleteEvents();
+                        }
+                    }
+            );
+
+            builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            });
+
+            builder.show();
+
             return true;
         }
 
@@ -88,6 +108,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return true;
         }
         if (id == R.id.print_table2) {
+
+            return true;
+        }
+
+        if (id == R.id.refresh_to_db) {
 
             return true;
         }

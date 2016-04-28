@@ -10,4 +10,7 @@
     <string name="print_table2">输出数据表2</string>
     <string name="latest_ten_days">最近10天的状态</string>
     <string name="refresh">刷新</string>
+
+    <string name="delete_or_not">确定删除数据库吗？</string>
+    <string name="refresh_to_db">刷新到数据库</string>
 </resources>

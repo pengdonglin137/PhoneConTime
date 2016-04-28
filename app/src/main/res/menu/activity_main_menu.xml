@@ -7,11 +7,18 @@
         android:id="@+id/delete_database"
         android:title="@string/delete_db"
         app:showAsAction="never"
-        android:enabled="false"/>
+        android:enabled="true"/>
     <item
         android:id="@+id/latest_ten_days"
         android:title="@string/latest_ten_days"
         app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/refresh_to_db"
+        android:title="@string/refresh_to_db"
+        app:showAsAction="never"
+        android:enabled="false"/>
+
     <item
         android:id="@+id/print_table1"
         android:title="@string/print_table1"

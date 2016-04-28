@@ -67,6 +67,8 @@ public class DatePickerActivity extends AppCompatActivity implements View.OnClic
                 DatePickerActivity.this.have_store = false;
             }
         });
+
+        datepicker.setMaxDate(System.currentTimeMillis());
     }
 
     @Override
