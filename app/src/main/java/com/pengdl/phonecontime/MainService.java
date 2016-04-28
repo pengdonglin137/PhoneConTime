@@ -46,25 +46,25 @@ public class MainService extends Service {
             String srcAction = intent.getAction();
             long seconds;
 
-            Log.d(TAG, "onReceive enter.");
+            Log.e(TAG, "onReceive enter.");
 
             time = ShareConst.GetNowYMD_HMS();
             seconds = ShareConst.currentTimeSeconds();
             Boolean kb_locked = mkeyguardManager.inKeyguardRestrictedInputMode();
             if (Intent.ACTION_SCREEN_OFF.equals(srcAction)) {
-                Log.d(TAG, "ACTION_SCREEN_OFF received, kb_locked: " + kb_locked);
+                Log.e(TAG, "ACTION_SCREEN_OFF received, kb_locked: " + kb_locked);
                 addToDb(time, SCREEN_OFF, kb_locked, seconds);
             } else if (Intent.ACTION_SCREEN_ON.equals(srcAction)) {
-                Log.d(TAG, "ACTION_SCREEN_ON received, kb_locked: " + kb_locked);
+                Log.e(TAG, "ACTION_SCREEN_ON received, kb_locked: " + kb_locked);
                 addToDb(time, SCREEN_ON, kb_locked, seconds);
             } else if (Intent.ACTION_USER_PRESENT.equals(srcAction)) {
-                Log.d(TAG, "ACTION_USER_PRESENT received, kb_locked: " + kb_locked);
+                Log.e(TAG, "ACTION_USER_PRESENT received, kb_locked: " + kb_locked);
                 addToDb(time, USER_PRESENT, kb_locked, seconds);
             } else if (Intent.ACTION_TIME_TICK.equals(srcAction)){
-                Log.d(TAG, "ACTION_TIME_TICK received, time: " + time);
+                Log.e(TAG, "ACTION_TIME_TICK received, time: " + time);
 
             } else if (Intent.ACTION_TIME_CHANGED.equals(srcAction)) {
-                Log.d(TAG, "ACTION_TIME_CHANGED received.");
+                Log.e(TAG, "ACTION_TIME_CHANGED received.");
                 resetData(TIMECHANGE);
             }
         }
@@ -143,7 +143,7 @@ public class MainService extends Service {
     }
 
     public void resetData(int reason) {
-        Log.d(TAG, "Reseting data, reason: " + reason);
+        Log.e(TAG, "Reseting data, reason: " + reason);
 
         if (reason == ANOTHERDAY) {
 
@@ -160,7 +160,7 @@ public class MainService extends Service {
 
     private void dumpEvent(screenEvent event) {
 
-        Log.d(TAG, "***************************"
+        Log.e(TAG, "***************************"
                 + "\n\tid: " + event.getId()
                 + "\n\ttype: " + event.getType()
                 + "\n\ttime: " + event.getTime_ymd() + " " + event.getTime_hms()
@@ -184,7 +184,7 @@ public class MainService extends Service {
 
         otherInit();
 
-        Log.d(TAG, "Started.");
+        Log.e(TAG, "Started.");
     }
 
     private void dataBaseInit() {
@@ -238,7 +238,7 @@ public class MainService extends Service {
         }
 
 
-        Log.d(TAG, "Destroyed.");
+        Log.e(TAG, "Destroyed.");
     }
 
     private void addToDb(CharSequence time, String evenType, Boolean kb_locked, long seconds) {
@@ -321,7 +321,7 @@ public class MainService extends Service {
 
         if (compareEvent != null) {
             if (compareEvent.getValid()) {
-                Log.d(TAG, "compare event type: " + compareEvent.getType() + ", time: " + compareEvent.getTime_hms());
+                Log.e(TAG, "compare event type: " + compareEvent.getType() + ", time: " + compareEvent.getTime_hms());
                 compareEvent.setValid(false);
                 duration = event.getSeconds() - compareEvent.getSeconds();
             } else {
@@ -331,7 +331,7 @@ public class MainService extends Service {
             duration = event.getSeconds() - getServerStartTime();
         }
 
-        Log.d(TAG, "This time duration: " + duration + ", all time duration: " + (duration + prev_duration) + ".");
+        Log.e(TAG, "This time duration: " + duration + ", all time duration: " + (duration + prev_duration) + ".");
 
         return setAllTimeDuration(duration+prev_duration);
     }
@@ -355,7 +355,7 @@ public class MainService extends Service {
     }
 
     private void updateLatestEvent(screenEvent event) {
-        Log.d(TAG, "UpdateLatestEvent.");
+        Log.e(TAG, "UpdateLatestEvent.");
         screenEvent latest = new screenEvent();
 
         latest.setType(event.getType());
@@ -393,7 +393,7 @@ public class MainService extends Service {
         event.setTime_hms(ShareConst.MASK);
 
         if ((event = dbMgr.queryEvent(event)) == null) {
-            Log.d(TAG, "Not found, date: " + date + ", flag: " + flag);
+            Log.e(TAG, "Not found, date: " + date + ", flag: " + flag);
             if (flag) {
                 return FormatMiss(ShareConst.currentTimeSeconds() - getServerStartTime());
             } else {
@@ -401,7 +401,7 @@ public class MainService extends Service {
             }
         } else {
             long duration = 0;
-            Log.d(TAG, "found, date: " + event.getDuration() + ", flag: " + flag);
+            Log.e(TAG, "found, date: " + event.getDuration() + ", flag: " + flag);
             if (flag) {
                 screenEvent compareEvent = find_event(null);
                 if (compareEvent != null) {
@@ -410,7 +410,7 @@ public class MainService extends Service {
                     duration = ShareConst.currentTimeSeconds() - getServerStartTime();
                 }
 
-                Log.d(TAG, "duration: " + duration + ", currentSeconds: " + ShareConst.currentTimeSeconds() + ", lastSeconds: " + event.getSeconds());
+                Log.e(TAG, "duration: " + duration + ", currentSeconds: " + ShareConst.currentTimeSeconds() + ", lastSeconds: " + event.getSeconds());
             }
 
             return FormatMiss(event.getDuration() + duration);

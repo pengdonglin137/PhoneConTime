@@ -45,11 +45,11 @@ public class DatePickerActivity extends AppCompatActivity implements View.OnClic
             month = preferences.getInt(ShareConst.DATEPICKER_MONTH, 0);
             day = preferences.getInt(ShareConst.DATEPICKER_DAY, 0);
 
-            Log.d(TAG, "from preference file, got: " +year + "-" + month + "-" + day);
+            Log.e(TAG, "from preference file, got: " +year + "-" + month + "-" + day);
         }
 
         if (year == 0 || month == 0 || day == 0) {
-            Log.d(TAG, "preference file invalid, reset date.");
+            Log.e(TAG, "preference file invalid, reset date.");
             editor.putString(ShareConst.DATEPICKER_VALID, ShareConst.VALID);
             Calendar c = Calendar.getInstance();
             year = c.get(Calendar.YEAR);
@@ -60,7 +60,7 @@ public class DatePickerActivity extends AppCompatActivity implements View.OnClic
         datepicker.init(year, month, day, new DatePicker.OnDateChangedListener() {
             @Override
             public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                Log.d(TAG, "onDateChanged.");
+                Log.e(TAG, "onDateChanged.");
                 DatePickerActivity.this.year = year;
                 DatePickerActivity.this.month = monthOfYear;
                 DatePickerActivity.this.day = dayOfMonth;
@@ -81,7 +81,7 @@ public class DatePickerActivity extends AppCompatActivity implements View.OnClic
                         + (day>9 ? day + "" : "0" + day);
                 Intent intent = new Intent();
                 intent.putExtra("date", date);
-                Log.d(TAG, "datePicker: " + date);
+                Log.e(TAG, "datePicker: " + date);
                 setResult(1001, intent);
 
                 if (!have_store) {

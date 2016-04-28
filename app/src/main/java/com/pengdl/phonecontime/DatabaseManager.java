@@ -58,7 +58,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.d(TAG, "onCreate");
+        Log.e(TAG, "onCreate");
 
         String sql = "CREATE TABLE " + TABLE1_NAME
                 + " (" + ID_FIELD + " INTEGER, "
@@ -77,13 +77,13 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.d(TAG, "onUpgrade");
+        Log.e(TAG, "onUpgrade");
         db.execSQL("DROP TABLE IF EXISTS " + TABLE1_NAME);
         onCreate(db);
     }
 
     public screenEvent addItem(screenEvent event) {
-        Log.d(TAG, "addItem");
+        Log.e(TAG, "addItem");
 
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -133,7 +133,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
     }
 
     public void deleteEvents(){
-        Log.d(TAG, "deleteEvents");
+        Log.e(TAG, "deleteEvents");
 
         onUpgrade(this.getReadableDatabase(), 1, 1);
     }
@@ -154,17 +154,17 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
         Cursor cursor = null;
         try {
-            Log.d(TAG, "SQL: " + selectQuery);
+            Log.e(TAG, "SQL: " + selectQuery);
             cursor = db.rawQuery(selectQuery, null);
         } catch (android.database.sqlite.SQLiteException e) {
             e.printStackTrace();
         }
 
-        Log.d(TAG, "cursor: " + cursor);
+        Log.e(TAG, "cursor: " + cursor);
         screenEvent result = null;
 
         if (cursor.getCount() == 1) {
-            Log.d(TAG, "one match.");
+            Log.e(TAG, "one match.");
 
             cursor.moveToFirst();
             result = new screenEvent();
@@ -183,7 +183,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
     }
 
     public void updateEvent(screenEvent event) {
-        Log.d(TAG, "updateEvent.");
+        Log.e(TAG, "updateEvent.");
         String selectQuery = "UPDATE " + TABLE1_NAME + " SET "
                 + DUR_FIELD + " = " + event.getDuration() + ", "
                 + TIME_IN_SECONDS_FILED + " = " + event.getSeconds() + " "

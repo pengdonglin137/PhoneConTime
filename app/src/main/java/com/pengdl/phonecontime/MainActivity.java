@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         widget_init();
 
-        Log.d(TAG, "onCreate");
+        Log.e(TAG, "onCreate");
     }
 
     @Override
@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startService(intent);
 
         if (bindService(intent, conn, Service.BIND_AUTO_CREATE)) {
-            Log.d(TAG, "Bind server succeed.");
+            Log.e(TAG, "Bind server succeed.");
         }
     }
 
@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onDestroy();
         unbindService(conn);
         stopService(intent);
-        Log.d(TAG, "onDestroy");
+        Log.e(TAG, "onDestroy");
     }
 
     @Override
@@ -192,12 +192,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "onActivityResult, requestCode: " + requestCode);
+        Log.e(TAG, "onActivityResult, requestCode: " + requestCode);
 
         if(requestCode == 1000 && resultCode == 1001)
         {
             String date_value = data.getStringExtra("date");
-            Log.d(TAG, "got date: " + date_value);
+            Log.e(TAG, "got date: " + date_value);
             date.setText(date_value);
         }
     }
