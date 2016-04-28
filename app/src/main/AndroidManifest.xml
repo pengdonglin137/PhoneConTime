@@ -25,6 +25,8 @@
 
         <activity android:name=".LineChartActivity"></activity>
 
+        <activity android:name=".LineColumnDependencyActivity"></activity>
+
     </application>
 
 </manifest>

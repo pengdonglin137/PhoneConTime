@@ -7,7 +7,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="lecho.lib.hellocharts.samples.LineChartActivity" >
+    tools:context="com.pengdl.phonecontime.PreviewLineChartActivity$PlaceholderFragment" >
 
     <lecho.lib.hellocharts.view.LineChartView
         android:id="@+id/chart_top"

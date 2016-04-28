@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onDestroy();
         unbindService(conn);
         stopService(intent);
-        Log.d(TAG, "onDestroy");
+        Log.e(TAG, "onDestroy");
     }
 
     @Override
@@ -152,8 +152,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onLongClick(View v) {
         switch (v.getId()) {
-            case R.id.dis:
+            case R.id.date: {
+                Intent intent = new Intent();
+                intent.setClass(this, LineColumnDependencyActivity.class);
+                startActivity(intent);
                 break;
+            }
             default:
                 break;
         }
@@ -182,12 +186,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             });
 
             builder.show();
-
-
         }
 
         return true;
     }
-
-
 }

@@ -23,7 +23,7 @@ public class ShareConst {
     }
 
     public static CharSequence GetNowHMS (){
-        return DateFormat.format("20yy-MM-dd HH-mm-ss", Calendar.getInstance());
+        return DateFormat.format("HH-mm-ss", Calendar.getInstance());
     }
 
     public static CharSequence GetNowYMD_HMS() {
