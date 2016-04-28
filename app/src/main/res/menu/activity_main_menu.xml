@@ -1,0 +1,24 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.pengdl.phonecontime.MainActivity" >
+
+    <item
+        android:id="@+id/delete_database"
+        android:title="@string/delete_db"
+        app:showAsAction="never"
+        android:enabled="false"/>
+    <item
+        android:id="@+id/latest_ten_days"
+        android:title="@string/latest_ten_days"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/print_table1"
+        android:title="@string/print_table1"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/print_table2"
+        android:title="@string/print_table2"
+        app:showAsAction="never"
+        android:enabled="false"/>
+</menu>

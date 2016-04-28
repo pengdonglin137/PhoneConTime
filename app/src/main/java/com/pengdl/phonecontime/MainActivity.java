@@ -13,17 +13,20 @@ import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.Calendar;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener  {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private final static String TAG = "OTP_A";
+    private final static String TAG = "PCT_A";
     private TextView dis;
-    private Button get, show, delete;
+    private Button refresh;
     private TextView date;
     private MainService.MainBinder binder;
     private Intent intent;
@@ -57,6 +60,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d(TAG, "onCreate");
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_main_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.delete_database) {
+
+            binder.deleteEvents();
+            return true;
+        }
+
+        if (id == R.id.latest_ten_days) {
+            Intent intent = new Intent();
+            intent.setClass(this, LineColumnDependencyActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        if (id == R.id.print_table1) {
+
+            binder.showEvents();
+            return true;
+        }
+        if (id == R.id.print_table2) {
+
+            return true;
+        }
+
+
+        return super.onOptionsItemSelected(item);
+    }
+
     public void service_begin_bind() {
         intent = new Intent(this, MainService.class);
         intent.setPackage("com.example.pengdl.onthephone");
@@ -76,16 +115,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void widget_init() {
         dis = (TextView) findViewById(R.id.dis);
-        get = (Button) findViewById(R.id.Get);
-        show = (Button) findViewById(R.id.Show);
-        delete = (Button) findViewById(R.id.Delete);
+        refresh = (Button) findViewById(R.id.Refresh);
         date = (TextView) findViewById(R.id.date);
 
-        get.setOnClickListener(this);
-        show.setOnClickListener(this);
-        delete.setOnClickListener(this);
+        refresh.setOnClickListener(this);
         date.setOnClickListener(this);
-        date.setOnLongClickListener(this);
         dis.setOnClickListener(this);
 
         date_init();
@@ -99,25 +133,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onDestroy();
         unbindService(conn);
         stopService(intent);
-        Log.e(TAG, "onDestroy");
+        Log.d(TAG, "onDestroy");
     }
 
     @Override
     public void onClick(View v) {
 
         switch (v.getId()) {
-            case R.id.Get: {
+            case R.id.Refresh: {
                 String dt = date.getText().toString();
                 Boolean flag = ShareConst.GetNowYMD().toString().equals(dt);
                 dis.setText(binder.onThePhoneTimeAt(dt, flag));
                 break;
             }
-            case R.id.Show:
-                binder.showEvents();
-                break;
-            case R.id.Delete:
-                binder.deleteEvents();
-                break;
             case R.id.date: {
                 Intent intent = new Intent();
                 intent.setClass(MainActivity.this, DatePickerActivity.class);
@@ -147,21 +175,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d(TAG, "got date: " + date_value);
             date.setText(date_value);
         }
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        switch (v.getId()) {
-            case R.id.date: {
-                Intent intent = new Intent();
-                intent.setClass(this, LineColumnDependencyActivity.class);
-                startActivity(intent);
-                break;
-            }
-            default:
-                break;
-        }
-        return true;
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {

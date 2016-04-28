@@ -14,23 +14,15 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import lecho.lib.hellocharts.animation.ChartAnimationListener;
-import lecho.lib.hellocharts.gesture.ZoomType;
-import lecho.lib.hellocharts.listener.ColumnChartOnValueSelectListener;
 import lecho.lib.hellocharts.listener.LineChartOnValueSelectListener;
 import lecho.lib.hellocharts.model.Axis;
-import lecho.lib.hellocharts.model.AxisValue;
-import lecho.lib.hellocharts.model.Column;
-import lecho.lib.hellocharts.model.ColumnChartData;
 import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
-import lecho.lib.hellocharts.model.SubcolumnValue;
 import lecho.lib.hellocharts.model.ValueShape;
 import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.util.ChartUtils;
 import lecho.lib.hellocharts.view.Chart;
-import lecho.lib.hellocharts.view.ColumnChartView;
 import lecho.lib.hellocharts.view.LineChartView;
 
 public class LineChartActivity extends AppCompatActivity {
@@ -59,12 +51,7 @@ public class LineChartActivity extends AppCompatActivity {
 
         private boolean hasAxes = true;
         private boolean hasAxesNames = true;
-        private boolean hasLines = true;
-        private boolean hasPoints = true;
-        private ValueShape shape = ValueShape.CIRCLE;
-        private boolean isFilled = false;
         private boolean hasLabels = false;
-        private boolean isCubic = false;
         private boolean hasLabelForSelected = false;
         private boolean pointsHaveDifferentColor;
 
@@ -106,52 +93,9 @@ public class LineChartActivity extends AppCompatActivity {
                 generateData();
                 return true;
             }
-            if (id == R.id.action_add_line) {
-                addLineToData();
-                return true;
-            }
-            if (id == R.id.action_toggle_lines) {
-                toggleLines();
-                return true;
-            }
-            if (id == R.id.action_toggle_points) {
-                togglePoints();
-                return true;
-            }
-            if (id == R.id.action_toggle_cubic) {
-                toggleCubic();
-                return true;
-            }
-            if (id == R.id.action_toggle_area) {
-                toggleFilled();
-                return true;
-            }
-            if (id == R.id.action_point_color) {
-                togglePointColor();
-                return true;
-            }
-            if (id == R.id.action_shape_circles) {
-                setCircles();
-                return true;
-            }
-            if (id == R.id.action_shape_square) {
-                setSquares();
-                return true;
-            }
-            if (id == R.id.action_shape_diamond) {
-                setDiamonds();
-                return true;
-            }
+
             if (id == R.id.action_toggle_labels) {
                 toggleLabels();
-                return true;
-            }
-            if (id == R.id.action_toggle_axes) {
-                toggleAxes();
-                return true;
-            }
-            if (id == R.id.action_toggle_axes_names) {
-                toggleAxesNames();
                 return true;
             }
             if (id == R.id.action_animate) {
@@ -159,31 +103,7 @@ public class LineChartActivity extends AppCompatActivity {
                 chart.startDataAnimation();
                 return true;
             }
-            if (id == R.id.action_toggle_selection_mode) {
-                toggleLabelForSelected();
 
-                Toast.makeText(getActivity(),
-                        "Selection mode set to " + chart.isValueSelectionEnabled() + " select any point.",
-                        Toast.LENGTH_SHORT).show();
-                return true;
-            }
-            if (id == R.id.action_toggle_touch_zoom) {
-                chart.setZoomEnabled(!chart.isZoomEnabled());
-                Toast.makeText(getActivity(), "IsZoomEnabled " + chart.isZoomEnabled(), Toast.LENGTH_SHORT).show();
-                return true;
-            }
-            if (id == R.id.action_zoom_both) {
-                chart.setZoomType(ZoomType.HORIZONTAL_AND_VERTICAL);
-                return true;
-            }
-            if (id == R.id.action_zoom_horizontal) {
-                chart.setZoomType(ZoomType.HORIZONTAL);
-                return true;
-            }
-            if (id == R.id.action_zoom_vertical) {
-                chart.setZoomType(ZoomType.VERTICAL);
-                return true;
-            }
             return super.onOptionsItemSelected(item);
         }
 
@@ -200,12 +120,7 @@ public class LineChartActivity extends AppCompatActivity {
 
             hasAxes = true;
             hasAxesNames = true;
-            hasLines = true;
-            hasPoints = true;
-            shape = ValueShape.CIRCLE;
-            isFilled = false;
             hasLabels = false;
-            isCubic = false;
             hasLabelForSelected = false;
             pointsHaveDifferentColor = false;
 
@@ -236,13 +151,13 @@ public class LineChartActivity extends AppCompatActivity {
 
                 Line line = new Line(values);
                 line.setColor(ChartUtils.COLORS[i]);
-                line.setShape(shape);
-                line.setCubic(isCubic);
-                line.setFilled(isFilled);
-                line.setHasLabels(hasLabels);
+                line.setShape(ValueShape.CIRCLE);
+                line.setCubic(true);
+                line.setFilled(false);
+                line.setHasLabels(false);
                 line.setHasLabelsOnlyForSelected(hasLabelForSelected);
-                line.setHasLines(hasLines);
-                line.setHasPoints(hasPoints);
+                line.setHasLines(true);
+                line.setHasPoints(true);
                 if (pointsHaveDifferentColor){
                     line.setPointColor(ChartUtils.COLORS[(i + 1) % ChartUtils.COLORS.length]);
                 }
@@ -285,100 +200,6 @@ public class LineChartActivity extends AppCompatActivity {
             generateData();
         }
 
-        private void toggleLines() {
-            hasLines = !hasLines;
-
-            generateData();
-        }
-
-        private void togglePoints() {
-            hasPoints = !hasPoints;
-
-            generateData();
-        }
-
-        private void toggleCubic() {
-            isCubic = !isCubic;
-
-            generateData();
-
-            if (isCubic) {
-                // It is good idea to manually set a little higher max viewport for cubic lines because sometimes line
-                // go above or below max/min. To do that use Viewport.inest() method and pass negative value as dy
-                // parameter or just set top and bottom values manually.
-                // In this example I know that Y values are within (0,100) range so I set viewport height range manually
-                // to (-5, 105).
-                // To make this works during animations you should use Chart.setViewportCalculationEnabled(false) before
-                // modifying viewport.
-                // Remember to set viewport after you call setLineChartData().
-                final Viewport v = new Viewport(chart.getMaximumViewport());
-                v.bottom = -5;
-                v.top = 105;
-                // You have to set max and current viewports separately.
-                chart.setMaximumViewport(v);
-                // I changing current viewport with animation in this case.
-                chart.setCurrentViewportWithAnimation(v);
-            } else {
-                // If not cubic restore viewport to (0,100) range.
-                final Viewport v = new Viewport(chart.getMaximumViewport());
-                v.bottom = 0;
-                v.top = 100;
-
-                // You have to set max and current viewports separately.
-                // In this case, if I want animation I have to set current viewport first and use animation listener.
-                // Max viewport will be set in onAnimationFinished method.
-                chart.setViewportAnimationListener(new ChartAnimationListener() {
-
-                    @Override
-                    public void onAnimationStarted() {
-                        // TODO Auto-generated method stub
-
-                    }
-
-                    @Override
-                    public void onAnimationFinished() {
-                        // Set max viewpirt and remove listener.
-                        chart.setMaximumViewport(v);
-                        chart.setViewportAnimationListener(null);
-
-                    }
-                });
-                // Set current viewpirt with animation;
-                chart.setCurrentViewportWithAnimation(v);
-            }
-
-        }
-
-        private void toggleFilled() {
-            isFilled = !isFilled;
-
-            generateData();
-        }
-
-        private void togglePointColor() {
-            pointsHaveDifferentColor = !pointsHaveDifferentColor;
-
-            generateData();
-        }
-
-        private void setCircles() {
-            shape = ValueShape.CIRCLE;
-
-            generateData();
-        }
-
-        private void setSquares() {
-            shape = ValueShape.SQUARE;
-
-            generateData();
-        }
-
-        private void setDiamonds() {
-            shape = ValueShape.DIAMOND;
-
-            generateData();
-        }
-
         private void toggleLabels() {
             hasLabels = !hasLabels;
 
@@ -390,31 +211,7 @@ public class LineChartActivity extends AppCompatActivity {
             generateData();
         }
 
-        private void toggleLabelForSelected() {
-            hasLabelForSelected = !hasLabelForSelected;
-
-            chart.setValueSelectionEnabled(hasLabelForSelected);
-
-            if (hasLabelForSelected) {
-                hasLabels = false;
-            }
-
-            generateData();
-        }
-
-        private void toggleAxes() {
-            hasAxes = !hasAxes;
-
-            generateData();
-        }
-
-        private void toggleAxesNames() {
-            hasAxesNames = !hasAxesNames;
-
-            generateData();
-        }
-
-        /**
+         /**
          * To animate values you have to change targets values and then call {@link Chart#startDataAnimation()}
          * method(don't confuse with View.animate()). If you operate on data that was set before you don't have to call
          * {@link LineChartView#setLineChartData(LineChartData)} again.

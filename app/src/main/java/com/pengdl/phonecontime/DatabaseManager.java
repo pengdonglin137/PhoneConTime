@@ -15,9 +15,9 @@ import java.util.List;
  */
 public class DatabaseManager extends SQLiteOpenHelper {
 
-    private final static String TAG = "OTP_DM";
+    private final static String TAG = "PCT_DM";
 
-    public final static String TABLE_NAME = "OTPB";
+    public final static String TABLE1_NAME = "PCT_TB1";
     public final static String ID_FIELD = "_id";
 
     /**
@@ -60,7 +60,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         Log.d(TAG, "onCreate");
 
-        String sql = "CREATE TABLE " + TABLE_NAME
+        String sql = "CREATE TABLE " + TABLE1_NAME
                 + " (" + ID_FIELD + " INTEGER, "
                 + TYPE_FIELD + " TEXT, "
                 + TIME_YMD_FILED + " TEXT, "
@@ -78,7 +78,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.d(TAG, "onUpgrade");
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE1_NAME);
         onCreate(db);
     }
 
@@ -98,7 +98,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         values.put(ID_PREV_FILED, event.getId_prev());
         values.put(ID_NEXT_FILED, event.getId_next());
 
-        event.setId(db.insert(TABLE_NAME, null, values));
+        event.setId(db.insert(TABLE1_NAME, null, values));
         db.close();
 
         return event;
@@ -107,7 +107,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
     public List<screenEvent> getAllEvents() {
         List<screenEvent> events = new ArrayList<screenEvent>();
 
-        String selectQuery = "SELECT * FROM " + TABLE_NAME;
+        String selectQuery = "SELECT * FROM " + TABLE1_NAME;
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -145,7 +145,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 + TIME_HMS_FILED + ", "
                 + DUR_FIELD + ", "
                 + TIME_IN_SECONDS_FILED
-                + " FROM " + TABLE_NAME + " WHERE "
+                + " FROM " + TABLE1_NAME + " WHERE "
                 + TIME_YMD_FILED + " = \"" + event.getTime_ymd()
                 + "\" AND "
                 + TIME_HMS_FILED + " = \"" + event.getTime_hms() + "\"";
@@ -184,7 +184,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     public void updateEvent(screenEvent event) {
         Log.d(TAG, "updateEvent.");
-        String selectQuery = "UPDATE " + TABLE_NAME + " SET "
+        String selectQuery = "UPDATE " + TABLE1_NAME + " SET "
                 + DUR_FIELD + " = " + event.getDuration() + ", "
                 + TIME_IN_SECONDS_FILED + " = " + event.getSeconds() + " "
                 + "WHERE "

@@ -19,27 +19,10 @@
         />
 
     <Button
-        android:id="@+id/Get"
+        android:id="@+id/Refresh"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Get Status"
-        android:layout_alignParentBottom="true"/>
-
-    <Button
-        android:id="@+id/Delete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Delete"
-        android:layout_alignParentBottom="true"
-        android:layout_centerInParent="true"
-        android:enabled="false"/>
-
-    <Button
-        android:id="@+id/Show"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Show"
-        android:layout_alignParentRight="true"
+        android:text="@string/refresh"
         android:layout_alignParentBottom="true"/>
 
     <TextView

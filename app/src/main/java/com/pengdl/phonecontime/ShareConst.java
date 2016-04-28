@@ -9,7 +9,7 @@ import java.util.Calendar;
  */
 public class ShareConst {
 
-    public final static String SHARESP = "OTP_SP";
+    public final static String SHARESP = "PCT_SP";
     public final static String DATEPICKER_VALID = "datepicker_valid";
     public final static String INVALID = "invalid";
     public final static String VALID = "valid";

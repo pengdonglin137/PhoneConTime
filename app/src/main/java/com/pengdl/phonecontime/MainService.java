@@ -17,7 +17,7 @@ import java.util.List;
 
 public class MainService extends Service {
 
-    private final static String TAG = "OTP_S";
+    private final static String TAG = "PCT_S";
     private long serverStartTime = 0;
     private ScreenBroadcastReceiver screenBroadcastReceiver;
     private MainBinder mainbinder = new MainBinder();

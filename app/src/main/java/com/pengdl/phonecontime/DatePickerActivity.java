@@ -13,7 +13,7 @@ import java.util.Calendar;
 
 public class DatePickerActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private final static String TAG = "OTP_DP";
+    private final static String TAG = "PCT_DP";
     private Button Okay, today;
     private DatePicker datepicker;
     private SharedPreferences preferences;
