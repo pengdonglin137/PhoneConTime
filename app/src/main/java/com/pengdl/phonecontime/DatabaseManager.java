@@ -2,6 +2,7 @@ package com.pengdl.phonecontime;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -48,13 +49,43 @@ public class DatabaseManager extends SQLiteOpenHelper {
      */
     public final static String VALID_FILED = "valid";
     public final static String KB_LOCK_FILED = "kb_locked";
-    public final static String ID_PREV_FILED = "_id_prev";
-    public final static String ID_NEXT_FILED = "_id_next";
+
+
+    /**
+     *  table2
+     */
+    public final static String TABLE2_NAME = "PCT_TB2";
+    public final static String STAGE0_2 = "stage0_2";
+    public final static String STAGE2_4 = "stage2_4";
+    public final static String STAGE4_6 = "stage4_6";
+    public final static String STAGE6_8 = "stage6_8";
+    public final static String STAGE8_10 = "stage8_10";
+    public final static String STAGE10_12 = "stage10_12";
+    public final static String STAGE12_14 = "stage12_14";
+    public final static String STAGE14_16 = "stage14_16";
+    public final static String STAGE16_18 = "stage16_18";
+    public final static String STAGE18_20 = "stage18_20";
+    public final static String STAGE20_22 = "stage20_22";
+    public final static String STAGE22_0 = "stage22_0";
+
+    public final static String[] stageNameIndex = new String[]{
+            STAGE0_2,
+            STAGE2_4,
+            STAGE4_6,
+            STAGE6_8,
+            STAGE8_10,
+            STAGE10_12,
+            STAGE12_14,
+            STAGE14_16,
+            STAGE16_18,
+            STAGE18_20,
+            STAGE20_22,
+            STAGE22_0,
+    };
 
     public DatabaseManager(Context context) {
         super(context, "otp_db", null, 1);
     }
-
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -69,8 +100,25 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 + DUR_FIELD + " INTEGER, "
                 + VALID_FILED + " TEXT, "
                 + KB_LOCK_FILED + " TEXT, "
-                + ID_PREV_FILED + " INTEGER, "
-                + ID_NEXT_FILED + " INTEGER, "
+                + " PRIMARY KEY (" + ID_FIELD +"));";
+
+        db.execSQL(sql);
+
+        sql = "CREATE TABLE " + TABLE2_NAME
+                + " (" + ID_FIELD + " INTEGER, "
+                + TIME_YMD_FILED + " TEXT, "
+                + STAGE0_2 + " INTEGER, "
+                + STAGE2_4 + " INTEGER, "
+                + STAGE4_6 + " INTEGER, "
+                + STAGE6_8 + " INTEGER, "
+                + STAGE8_10 + " INTEGER, "
+                + STAGE10_12 + " INTEGER, "
+                + STAGE12_14 + " INTEGER, "
+                + STAGE14_16 + " INTEGER, "
+                + STAGE16_18 + " INTEGER, "
+                + STAGE18_20 + " INTEGER, "
+                + STAGE20_22 + " INTEGER, "
+                + STAGE22_0 + " INTEGER, "
                 + " PRIMARY KEY (" + ID_FIELD +"));";
         db.execSQL(sql);
     }
@@ -95,8 +143,6 @@ public class DatabaseManager extends SQLiteOpenHelper {
         values.put(DUR_FIELD, event.getDuration());
         values.put(VALID_FILED, event.getValid().toString());
         values.put(KB_LOCK_FILED, event.getKb_locked().toString());
-        values.put(ID_PREV_FILED, event.getId_prev());
-        values.put(ID_NEXT_FILED, event.getId_next());
 
         event.setId(db.insert(TABLE1_NAME, null, values));
         db.close();
@@ -123,8 +169,6 @@ public class DatabaseManager extends SQLiteOpenHelper {
             event.setDuration(cursor.getInt(5));
             event.setValid(Boolean.parseBoolean(cursor.getString(6)));
             event.setKb_locked(Boolean.parseBoolean(cursor.getString(7)));
-            event.setId_prev(cursor.getInt(8));
-            event.setId_next(cursor.getInt(9));
 
             events.add(event);
         }
@@ -189,6 +233,117 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 + TIME_IN_SECONDS_FILED + " = " + event.getSeconds() + " "
                 + "WHERE "
                 + ID_FIELD + " = " + event.getId();
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL(selectQuery);
+    }
+
+    public StageItem QueryStageItem(String date) {
+        StageItem stageitem = null;
+
+        String selectQuery = "SELECT "
+                + ID_FIELD + ", "
+                + TIME_YMD_FILED + ", "
+                + STAGE0_2 + ", "
+                + STAGE2_4 + ", "
+                + STAGE4_6 + ", "
+                + STAGE6_8 + ", "
+                + STAGE8_10 + ", "
+                + STAGE10_12 + ", "
+                + STAGE12_14 + ", "
+                + STAGE14_16 + ", "
+                + STAGE16_18 + ", "
+                + STAGE18_20 + ", "
+                + STAGE20_22 + ", "
+                + STAGE22_0 + " "
+                + " FROM " + TABLE2_NAME + " WHERE "
+                + TIME_YMD_FILED + " = \"" + date + "\"";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.getCount() != 1) {
+            Log.e(TAG, "Can not find " + date + " in table2");
+        } else {
+            int i = 0;
+            stageitem = new StageItem();
+            cursor.moveToFirst();
+            stageitem.setId(cursor.getInt(0));
+            stageitem.setTime_ymd(cursor.getString(1));
+            while(i < ShareConst.STAGECOUNT) {
+                stageitem.addValue(cursor.getLong(i+2));
+                i++;
+            }
+        }
+
+        return stageitem;
+    }
+
+    public List<StageItem> getAllStages() {
+        List<StageItem> stageitems = new ArrayList<StageItem>();
+
+        String selectQuery = "SELECT * FROM " + TABLE2_NAME;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        while(cursor.moveToNext()) {
+            StageItem stageitem = new StageItem();
+            int i = 0;
+            stageitem = new StageItem();
+            stageitem.setId(cursor.getInt(0));
+            stageitem.setTime_ymd(cursor.getString(1));
+            while(i < ShareConst.STAGECOUNT) {
+                stageitem.addValue(cursor.getLong(i+2));
+                i++;
+            }
+            stageitems.add(stageitem);
+        }
+
+        return stageitems;
+    }
+
+    public StageItem addStageItem(StageItem item) {
+        Log.d(TAG, "addStageItem");
+
+        if (item.getCount() != ShareConst.STAGECOUNT) {
+            Log.e(TAG, "please fill StageItem.");
+            return null;
+        }
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(TIME_YMD_FILED, item.getTime_ymd());
+        int i = 0;
+        while (i < ShareConst.STAGECOUNT) {
+            values.put(stageNameIndex[i], item.getStage(i));
+            i++;
+        }
+
+        item.setId(db.insert(TABLE2_NAME, null, values));
+        db.close();
+
+        return item;
+    }
+
+    public void updateStageItem(StageItem item) {
+        Log.d(TAG, "updateStageItem.");
+
+        int i = 0;
+        String tr = new String();
+        while (i < (ShareConst.STAGECOUNT-1)) {
+            tr = tr + stageNameIndex[i] + " = " + item.getStage(i) + ", ";
+            i++;
+        }
+
+        tr = tr + stageNameIndex[i] + " = " + item.getStage(i);
+
+        String selectQuery = "UPDATE " + TABLE2_NAME + " SET "
+                + tr + " WHERE "
+                + ID_FIELD + " = " + item.getId();
+        Log.d(TAG, "sql cmd: " + selectQuery);
 
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(selectQuery);

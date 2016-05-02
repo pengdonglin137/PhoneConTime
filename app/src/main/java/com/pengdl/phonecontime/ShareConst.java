@@ -17,6 +17,8 @@ public class ShareConst {
     public final static String DATEPICKER_MONTH = "datepicker_month";
     public final static String DATEPICKER_DAY = "datepicker_day";
     public final static String MASK = "99-99-99";
+    public final static String ALARM_MASK = "com.pengdl.phonecontime.alarm";
+    public final static int STAGECOUNT = 12;
 
     public static CharSequence GetNowYMD (){
         return DateFormat.format("20yy-MM-dd", Calendar.getInstance());
@@ -32,5 +34,54 @@ public class ShareConst {
 
     public static long currentTimeSeconds() {
         return System.currentTimeMillis()/1000;
+    }
+
+    public static long getMillisBasedOnDate(DateTime datetime) {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, datetime.getHour());
+        calendar.set(Calendar.MINUTE, datetime.getMinutes());
+        calendar.set(Calendar.SECOND, datetime.getSeconds());
+
+        return calendar.getTimeInMillis();
+    }
+}
+
+class DateTime {
+
+    DateTime(int hour, int minutes, int seconds) {
+        this.hour = hour;
+        this.minutes = minutes;
+        this.seconds = seconds;
+    }
+
+    private int hour;
+    private int minutes;
+
+    public int getSeconds() {
+        return seconds;
+    }
+
+    public void setSeconds(int seconds) {
+        this.seconds = seconds;
+    }
+
+    private int seconds;
+
+    public int getHour() {
+        return hour;
+    }
+
+    public void setHour(int hour) {
+        this.hour = hour;
+    }
+
+    public int getMinutes() {
+        return minutes;
+    }
+
+    public void setMinutes(int minutes) {
+        this.minutes = minutes;
     }
 }

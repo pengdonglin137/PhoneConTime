@@ -1,5 +1,11 @@
 package com.pengdl.phonecontime;
 
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+
 /**
  * Created by pengdl on 4/24/16.
  */
@@ -11,17 +17,7 @@ public class screenEvent {
     private long duration;
     private Boolean valid;
     private Boolean kb_locked;
-    private long id_prev;
-    private long id_next;
     private long seconds;
-
-    public long getId_prev() {
-        return id_prev;
-    }
-
-    public void setId_prev(long id_prev) {
-        this.id_prev = id_prev;
-    }
 
     public long getSeconds() {
         return seconds;
@@ -29,15 +25,6 @@ public class screenEvent {
 
     public void setSeconds(long seconds) {
         this.seconds = seconds;
-    }
-
-    public long getId_next() {
-        return id_next;
-
-    }
-
-    public void setId_next(long id_next) {
-        this.id_next = id_next;
     }
 
     public Boolean getKb_locked() {
@@ -99,5 +86,48 @@ public class screenEvent {
 
     public void setDuration(long duration) {
         this.duration = duration;
+    }
+}
+
+
+class StageItem {
+    private final static String TAG = "PCT_StageItem";
+    private long id;
+    private String time_ymd;
+    private List<Long> stage = new ArrayList<Long>();
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getTime_ymd() {
+        return time_ymd;
+    }
+
+    public void setTime_ymd(String time_ymd) {
+        this.time_ymd = time_ymd;
+    }
+
+    public int getCount () {
+        return stage.size();
+    }
+
+    public long getStage(int index) {
+        //Log.d(TAG, "getStage");
+        return stage.get(index);
+    }
+
+    public void addValue(long value) {
+        //Log.d(TAG, "addValue");
+        stage.add(value);
+    }
+
+    public void updateValue(int index, long value) {
+        //Log.d(TAG, "updateValue");
+        stage.set(index, value);
     }
 }
