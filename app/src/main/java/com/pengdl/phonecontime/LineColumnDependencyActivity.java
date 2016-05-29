@@ -93,50 +93,77 @@ public class LineColumnDependencyActivity extends ActionBarActivity {
 
             while(i<ShareConst.STAGECOUNT) {
                 if (items[j] != null) {
-                    Durations[j][i] = items[j].getStage(i)/(60)/10;  // seconds --> minutes
+                    Durations[latest_x_days - 1 - j][i] = items[j].getStage(i)/(60);  // seconds --> minutes
                 } else {
-                    Durations[j][i] = 0;
+                    Durations[latest_x_days - 1 - j][i] = 0;
                     //Durations[j][i] = i * 30 + j * 30;
-
                 }
                 i++;
             }
 
             i = 0;
-            long temp = Durations[j][i];
+            long temp = Durations[latest_x_days - 1 - j][i];
             while(i < ShareConst.STAGECOUNT) {
-                if (Durations[j][i] != 0) {
-                    temp = Durations[j][i];
+                if (Durations[latest_x_days - 1 - j][i] != 0) {
+                    temp = Durations[latest_x_days - 1 - j][i];
                 } else {
-                    Durations[j][i] = temp;
+                    Durations[latest_x_days - 1 - j][i] = temp;
                 }
                 i++;
             }
 
             i = 0;
-            MaxScan[j] = Durations[j][0];
+            MaxScan[latest_x_days - 1 - j] = Durations[latest_x_days - 1 - j][0];
             while(i < ShareConst.STAGECOUNT) {
-                if (Durations[j][i] > MaxScan[j]) {
-                    MaxScan[j] = Durations[j][i];
+                if (Durations[latest_x_days - 1 - j][i] > MaxScan[latest_x_days - 1 - j]) {
+                    MaxScan[latest_x_days - 1 - j] = Durations[latest_x_days - 1 - j][i];
                 }
                 i++;
             }
-            MaxScan[j] = (MaxScan[j] + 10) / 10 * 10;
+            MaxScan[latest_x_days - 1 - j] = (MaxScan[latest_x_days - 1 - j] + 10) / 10 * 10;
 
             screenEvent event = new screenEvent();
             event.setTime_hms(ShareConst.MASK);
             event.setTime_ymd(tmp_date);
             event = dbMgr.queryEvent(event);
             if (event != null) {
-                DayDuration[j] = event.getDuration();
+                DayDuration[latest_x_days - 1 - j] = event.getDuration() / 60;
             } else {
-                DayDuration[j] = 0;
+                DayDuration[latest_x_days - 1 - j] = 0;
                 //DayDuration[j] = j * 60;
-
             }
 
             tmp_date = new_date(date, j);
             j++;
+        }
+
+        {
+            for(j = 0; j < latest_x_days; j++)
+                Log.d(TAG, " " + Durations[j][0] + " "
+                        + " " + Durations[j][1] + " "
+                        + " " + Durations[j][2] + " "
+                        + " " + Durations[j][3] + " "
+                        + " " + Durations[j][4] + " "
+                        + " " + Durations[j][5] + " "
+                        + " " + Durations[j][6] + " "
+                        + " " + Durations[j][7] + " "
+                        + " " + Durations[j][8] + " "
+                        + " " + Durations[j][9] + " "
+                        + " " + Durations[j][10] + " "
+                        + " " + Durations[j][11]
+                );
+
+            Log.d(TAG, " " + DayDuration[0] + " "
+                    + " " + DayDuration[1] + " "
+                    + " " + DayDuration[2] + " "
+                    + " " + DayDuration[3] + " "
+                    + " " + DayDuration[4] + " "
+                    + " " + DayDuration[5] + " "
+                    + " " + DayDuration[6] + " "
+                    + " " + DayDuration[7] + " "
+                    + " " + DayDuration[8] + " "
+                    + " " + DayDuration[9] + " "
+            );
         }
     }
 
@@ -197,7 +224,7 @@ public class LineColumnDependencyActivity extends ActionBarActivity {
             columnData = new ColumnChartData(columns);
 
             columnData.setAxisXBottom(new Axis(axisValues).setHasLines(true));
-            columnData.setAxisYLeft(new Axis().setHasLines(true).setMaxLabelChars(2));
+            columnData.setAxisYLeft(new Axis().setHasLines(true).setMaxLabelChars(4));
 
             chartBottom.setColumnChartData(columnData);
 
@@ -226,6 +253,7 @@ public class LineColumnDependencyActivity extends ActionBarActivity {
 
             Line line = new Line(values);
             line.setColor(ChartUtils.COLOR_GREEN).setCubic(true);
+            line.setCubic(false);
 
             List<Line> lines = new ArrayList<Line>();
             lines.add(line);
@@ -240,7 +268,7 @@ public class LineColumnDependencyActivity extends ActionBarActivity {
             chartTop.setViewportCalculationEnabled(false);
 
             // And set initial max viewport and current viewport- remember to set viewports after data.
-            Viewport v = new Viewport(0, 24*60/10, ShareConst.STAGECOUNT - 1, 0);
+            Viewport v = new Viewport(0, 24*60, ShareConst.STAGECOUNT - 1, 0);
             chartTop.setMaximumViewport(v);
             chartTop.setCurrentViewport(v);
 
@@ -271,7 +299,6 @@ public class LineColumnDependencyActivity extends ActionBarActivity {
 
             @Override
             public void onValueSelected(int columnIndex, int subcolumnIndex, SubcolumnValue value) {
-                Log.d(TAG, "columuIndex: " + columnIndex + " subcolumnIndex: " + subcolumnIndex + " value: " + value);
                 generateLineData(value.getColor(), columnIndex);
             }
 
