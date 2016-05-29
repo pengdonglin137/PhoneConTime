@@ -99,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (id == R.id.latest_ten_days) {
             Intent intent = new Intent();
             intent.setClass(this, LineColumnDependencyActivity.class);
+            intent.putExtra("date", date.getText().toString());
             startActivity(intent);
             return true;
         }
@@ -180,6 +181,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.dis: {
                 Intent intent = new Intent();
                 intent.setClass(this, LineChartActivity.class);
+                intent.putExtra("date", date.getText().toString());
                 startActivity(intent);
                 break;
             }

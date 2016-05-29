@@ -19,9 +19,9 @@ public class DatePickerActivity extends AppCompatActivity implements View.OnClic
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
     private String datepicker_valid = null;
-    private int year;
-    private int month;
-    private int day;
+    private int year = 0;
+    private int month = 0;
+    private int day = 0;
     private Boolean have_store = false;
 
 

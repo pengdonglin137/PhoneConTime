@@ -58,13 +58,13 @@ public class MainService extends Service {
             Boolean kb_locked = mkeyguardManager.inKeyguardRestrictedInputMode();
             if (Intent.ACTION_SCREEN_OFF.equals(srcAction)) {
                 Log.d(TAG, "ACTION_SCREEN_OFF received, kb_locked: " + kb_locked);
-                addToDb(time, SCREEN_OFF, kb_locked, seconds);
+                addToDb(time, SCREEN_OFF, kb_locked, seconds, -1);
             } else if (Intent.ACTION_SCREEN_ON.equals(srcAction)) {
                 Log.d(TAG, "ACTION_SCREEN_ON received, kb_locked: " + kb_locked);
-                addToDb(time, SCREEN_ON, kb_locked, seconds);
+                addToDb(time, SCREEN_ON, kb_locked, seconds, -1);
             } else if (Intent.ACTION_USER_PRESENT.equals(srcAction)) {
                 Log.d(TAG, "ACTION_USER_PRESENT received, kb_locked: " + kb_locked);
-                addToDb(time, USER_PRESENT, kb_locked, seconds);
+                addToDb(time, USER_PRESENT, kb_locked, seconds, -1);
             } else if (Intent.ACTION_TIME_CHANGED.equals(srcAction)) {
                 Log.d(TAG, "ACTION_TIME_CHANGED received.");
                 //resetData(TIMECHANGE);
@@ -83,13 +83,13 @@ public class MainService extends Service {
                     if (isactive) {
                         addToDb(old_date,
                                 SCREEN_OFF, mkeyguardManager.inKeyguardRestrictedInputMode(),
-                                ShareConst.currentTimeSeconds());
+                                ShareConst.currentTimeSeconds(), 23);
+                    } else {
+                        updateLatestStageItem(getStageItemIndex(old_hour));
                     }
 
-                    updateLatestStageItem(getStageItemIndex(old_hour));
                     resetData(ANOTHERDAY);
                     initLatestStageItem(date.split(" ")[0]);
-
                 } else {
                     updateLatestStageItem(getStageItemIndex(hour));
                 }
@@ -311,13 +311,13 @@ public class MainService extends Service {
         if (isactive) {
             addToDb(ShareConst.GetNowYMD_HMS(),
                     SCREEN_OFF, mkeyguardManager.inKeyguardRestrictedInputMode(),
-                    ShareConst.currentTimeSeconds());
+                    ShareConst.currentTimeSeconds(), -1);
         }
 
         Log.d(TAG, "Destroyed.");
     }
 
-    private void addToDb(CharSequence time, String evenType, Boolean kb_locked, long seconds) {
+    private void addToDb(CharSequence time, String evenType, Boolean kb_locked, long seconds, int hour) {
         screenEvent event = new screenEvent();
 
         event.setTime_ymd(time.toString().split(" ")[0].trim());
@@ -337,7 +337,11 @@ public class MainService extends Service {
                 //dbMgr.addItem(event);
                 //dumpEvent(event);
                 updateLatestEvent(event);
-                updateLatestStageItem(getStageItemIndex(Calendar.getInstance().get(Calendar.HOUR_OF_DAY)));
+                if (hour >= 0) {
+                    updateLatestStageItem(getStageItemIndex(hour));
+                } else {
+                    updateLatestStageItem(getStageItemIndex(Calendar.getInstance().get(Calendar.HOUR_OF_DAY)));
+                }
                 break;
             case SCREEN_ON:
                 setPreScnOn(event);

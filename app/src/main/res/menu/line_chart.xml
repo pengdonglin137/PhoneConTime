@@ -7,12 +7,4 @@
         android:id="@+id/action_reset"
         android:title="Reset chart"
         app:showAsAction="never"/>
-    <item
-        android:id="@+id/action_toggle_labels"
-        android:title="Toggle labels"
-        app:showAsAction="never"/>
-    <item
-        android:id="@+id/action_animate"
-        android:title="Animate chart"
-        app:showAsAction="never"/>
 </menu>

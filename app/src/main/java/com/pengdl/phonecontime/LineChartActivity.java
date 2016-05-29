@@ -1,8 +1,14 @@
 package com.pengdl.phonecontime;
 
+import android.app.Service;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,8 +20,11 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.datatype.Duration;
+
 import lecho.lib.hellocharts.listener.LineChartOnValueSelectListener;
 import lecho.lib.hellocharts.model.Axis;
+import lecho.lib.hellocharts.model.AxisValue;
 import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
@@ -27,10 +36,67 @@ import lecho.lib.hellocharts.view.LineChartView;
 
 public class LineChartActivity extends AppCompatActivity {
 
+    private final static String TAG = "PCT_LCRT";
+
+    private String date;
+    private static long[] Durations = new long[ShareConst.STAGECOUNT];
+    private StageItem item;
+    private DatabaseManager dbMgr;
+    private static long MaxScan = 24*60;
+
+    private void getDisDate(){
+        Intent intent = getIntent();
+        date = intent.getStringExtra("date");
+    }
+
+    public void getDuration() {
+        int i = 0;
+
+        dbMgr = new DatabaseManager(this);
+        item = dbMgr.QueryStageItem(date);
+        if (item != null) {
+            while(i<ShareConst.STAGECOUNT) {
+                Durations[i] = item.getStage(i)/(60);  // seconds --> minutes
+                i++;
+            }
+        } else {
+            while(i < ShareConst.STAGECOUNT) {
+                Durations[i] = 0;
+                i++;
+            }
+        }
+
+        i = 0;
+        long temp = Durations[0];
+        while(i < ShareConst.STAGECOUNT) {
+            if (Durations[i] != 0) {
+                temp = Durations[i];
+            } else {
+                Durations[i] = temp;
+            }
+            i++;
+        }
+
+        i = 0;
+        MaxScan = Durations[0];
+        while(i < ShareConst.STAGECOUNT) {
+            if (Durations[i] > MaxScan) {
+                MaxScan = Durations[i];
+            }
+            i++;
+        }
+
+        MaxScan = (MaxScan + 10) / 10 * 10;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_line_chart);
+
+        getDisDate();
+        getDuration();
+
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().add(R.id.container, new PlaceholderFragment()).commit();
         }
@@ -43,17 +109,11 @@ public class LineChartActivity extends AppCompatActivity {
 
         private LineChartView chart;
         private LineChartData data;
-        private int numberOfLines = 1;
-        private int maxNumberOfLines = 4;
-        private int numberOfPoints = 12;
+        private int numberOfPoints = ShareConst.STAGECOUNT;
 
-        float[][] randomNumbersTab = new float[maxNumberOfLines][numberOfPoints];
-
-        private boolean hasAxes = true;
-        private boolean hasAxesNames = true;
-        private boolean hasLabels = false;
         private boolean hasLabelForSelected = false;
-        private boolean pointsHaveDifferentColor;
+
+        public final static String[] times = new String[]{"2", "4", "6", "8", "10", "12", "14", "16", "18", "20", "22", "24"};
 
         public PlaceholderFragment() {
         }
@@ -65,9 +125,6 @@ public class LineChartActivity extends AppCompatActivity {
 
             chart = (LineChartView) rootView.findViewById(R.id.chart);
             chart.setOnValueTouchListener(new ValueTouchListener());
-
-            // Generate some random values.
-            generateValues();
 
             generateData();
 
@@ -94,36 +151,11 @@ public class LineChartActivity extends AppCompatActivity {
                 return true;
             }
 
-            if (id == R.id.action_toggle_labels) {
-                toggleLabels();
-                return true;
-            }
-            if (id == R.id.action_animate) {
-                prepareDataAnimation();
-                chart.startDataAnimation();
-                return true;
-            }
-
             return super.onOptionsItemSelected(item);
         }
 
-        private void generateValues() {
-            for (int i = 0; i < maxNumberOfLines; ++i) {
-                for (int j = 0; j < numberOfPoints; ++j) {
-                    randomNumbersTab[i][j] = (float) Math.random() * 100f;
-                }
-            }
-        }
-
         private void reset() {
-            numberOfLines = 1;
-
-            hasAxes = true;
-            hasAxesNames = true;
-            hasLabels = false;
             hasLabelForSelected = false;
-            pointsHaveDifferentColor = false;
-
             chart.setValueSelectionEnabled(hasLabelForSelected);
             resetViewport();
         }
@@ -132,7 +164,7 @@ public class LineChartActivity extends AppCompatActivity {
             // Reset viewport height range to (0,100)
             final Viewport v = new Viewport(chart.getMaximumViewport());
             v.bottom = 0;
-            v.top = 100;
+            v.top = MaxScan;
             v.left = 0;
             v.right = numberOfPoints - 1;
             chart.setMaximumViewport(v);
@@ -141,88 +173,32 @@ public class LineChartActivity extends AppCompatActivity {
 
         private void generateData() {
 
-            List<Line> lines = new ArrayList<Line>();
-            for (int i = 0; i < numberOfLines; ++i) {
+            List<AxisValue> axisValues = new ArrayList<AxisValue>();
+            List<PointValue> values = new ArrayList<PointValue>();
 
-                List<PointValue> values = new ArrayList<PointValue>();
-                for (int j = 0; j < numberOfPoints; ++j) {
-                    values.add(new PointValue(j, randomNumbersTab[i][j]));
-                }
-
-                Line line = new Line(values);
-                line.setColor(ChartUtils.COLORS[i]);
-                line.setShape(ValueShape.CIRCLE);
-                line.setCubic(true);
-                line.setFilled(false);
-                line.setHasLabels(false);
-                line.setHasLabelsOnlyForSelected(hasLabelForSelected);
-                line.setHasLines(true);
-                line.setHasPoints(true);
-                if (pointsHaveDifferentColor){
-                    line.setPointColor(ChartUtils.COLORS[(i + 1) % ChartUtils.COLORS.length]);
-                }
-                lines.add(line);
+            for (int j = 0; j < numberOfPoints; ++j) {
+                values.add(new PointValue(j, Durations[j]));
+                axisValues.add(new AxisValue(j).setLabel(times[j]));
             }
+
+            Line line = new Line(values);
+            line.setColor(ChartUtils.COLOR_GREEN).setCubic(true);
+            line.setCubic(false);
+
+            List<Line> lines = new ArrayList<Line>();
+            lines.add(line);
 
             data = new LineChartData(lines);
 
-            if (hasAxes) {
-                Axis axisX = new Axis();
-                Axis axisY = new Axis().setHasLines(true);
-                if (hasAxesNames) {
-                    axisX.setName("Axis X");
-                    axisY.setName("Axis Y");
-                }
-                data.setAxisXBottom(axisX);
-                data.setAxisYLeft(axisY);
-            } else {
-                data.setAxisXBottom(null);
-                data.setAxisYLeft(null);
-            }
+            Axis axisX = new Axis(axisValues).setHasLines(true);
+            Axis axisY = new Axis().setHasLines(true).setMaxLabelChars(3);
+            axisX.setName("时间/小时");
+            axisY.setName("时长/分钟");
+            data.setAxisXBottom(axisX);
+            data.setAxisYLeft(axisY);
 
             data.setBaseValue(Float.NEGATIVE_INFINITY);
             chart.setLineChartData(data);
-
-        }
-
-        /**
-         * Adds lines to data, after that data should be set again with
-         * {@link LineChartView#setLineChartData(LineChartData)}. Last 4th line has non-monotonically x values.
-         */
-        private void addLineToData() {
-            if (data.getLines().size() >= maxNumberOfLines) {
-                Toast.makeText(getActivity(), "Samples app uses max 4 lines!", Toast.LENGTH_SHORT).show();
-                return;
-            } else {
-                ++numberOfLines;
-            }
-
-            generateData();
-        }
-
-        private void toggleLabels() {
-            hasLabels = !hasLabels;
-
-            if (hasLabels) {
-                hasLabelForSelected = false;
-                chart.setValueSelectionEnabled(hasLabelForSelected);
-            }
-
-            generateData();
-        }
-
-         /**
-         * To animate values you have to change targets values and then call {@link Chart#startDataAnimation()}
-         * method(don't confuse with View.animate()). If you operate on data that was set before you don't have to call
-         * {@link LineChartView#setLineChartData(LineChartData)} again.
-         */
-        private void prepareDataAnimation() {
-            for (Line line : data.getLines()) {
-                for (PointValue value : line.getValues()) {
-                    // Here I modify target only for Y values but it is OK to modify X targets as well.
-                    value.setTarget(value.getX(), (float) Math.random() * 100);
-                }
-            }
         }
 
         private class ValueTouchListener implements LineChartOnValueSelectListener {
